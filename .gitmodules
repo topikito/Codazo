@@ -1,0 +1,3 @@
+[submodule "fatfree-core"]
+	path = fatfree-core
+	url = https://github.com/bcosca/fatfree.git
