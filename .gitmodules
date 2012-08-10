@@ -1,3 +1,3 @@
-[submodule "fatfree-core"]
-	path = fatfree-core
-	url = https://github.com/bcosca/fatfree.git
+[submodule "silex-core"]
+	path = silex-core
+	url = https://github.com/fabpot/Silex.git
