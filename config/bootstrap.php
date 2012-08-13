@@ -27,7 +27,7 @@ $app->match('/', function () use ($app)
 		$form = $app['form.factory']->createBuilder('form')
 			->add('code', 'textarea', array('label' => ' ', 'attr' => array('style' => 'height: 300px', 'class' => 'span12')))
 			->add('lang', 'text', array('label' => 'Language', 'required' => false, 'attr' => array('placeholder' => 'Auto')))
-			->add('convert_tabs', 'checkbox', array('label' => 'Convert spaces to tabs', 'required' => false))
+			->add('convert_tabs', 'checkbox', array('label' => 'Convert tabs to spaces', 'required' => false))
 			->add('tab2spaces', 'text', array('label' => 'Tab to spaces', 'required' => false, 'attr' => array('value' => '4')))
 			->getForm();
 

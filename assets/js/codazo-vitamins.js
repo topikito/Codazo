@@ -1,5 +1,9 @@
 $(document).ready(function() {
 
+	function htmlEntities(str) {
+		return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+	}
+
 	//Form elements
 	var codeTextArea	= $('#form_code');
 	var language		= $('#form_lang');
@@ -21,7 +25,7 @@ $(document).ready(function() {
 	});
 
 	var refreshPreview = function() {
-		var code = codeTextArea.val();
+		var code = htmlEntities(codeTextArea.val());
 		if (convertTabs.is(':checked'))
 		{
 			var tab2SpacesValue = tab2Spaces.val();
