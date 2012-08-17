@@ -1,0 +1,16 @@
+{% include 'common/header.twig' %}
+{% include 'common/navigation.twig' with {'currentSection': currentSection} %}
+
+<div class="container">
+
+	<div class="">
+		<p>
+		<h1>Show me the code!</h1>
+		<pre class="prettyprint linenums" id="view-pretty-code">{{ code.code }}</pre>
+		<hr>
+		</p>
+	</div>
+
+</div> <!-- /container -->
+
+{% include 'common/footer.twig' %}

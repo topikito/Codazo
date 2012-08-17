@@ -11,14 +11,31 @@ $app->register(new Silex\Provider\TwigServiceProvider(), array(
 $app->register(new Silex\Provider\TranslationServiceProvider(), array(
 	'translator.messages' => array()
 ));
-$app['controllers']->assert('id', '\d+');
+$app->register(new Silex\Provider\DoctrineServiceProvider(), array(
+	'db.options' => array(
+		'driver' => 'pdo_mysql',
+		'host' => 'localhost',
+		'dbname' => 'codazo_db',
+		'user' => 'root',
+		'password' => 'root',
+	),
+));
 $app['debug'] = true;
 
 
 /** DISPATCHER * */
 $app->get('/{id}', function ($id) use ($app)
 	{
-		echo 'You are at CODE ' . $id;
+	var_dump($id);die;
+		$sql  = "SELECT code FROM code WHERE unique_id = ?";
+		$code = $app['db']->fetchAssoc($sql, array((int) $id));
+
+		$viewParams = array(
+			'code'				=> $code,
+			'currentSection'	=> 'view'
+		);
+
+		return $app['twig']->render('view.twig', $viewParams);
 	});
 
 $app->match('/', function () use ($app)
@@ -50,7 +67,8 @@ $app->match('/', function () use ($app)
 		}
 
 		$viewParams = array(
-			'form' => $form->createView()
+			'form'				=> $form->createView(),
+			'currentSection'	=> 'paste'
 		);
 
 		return $app['twig']->render('paste.twig', $viewParams);
