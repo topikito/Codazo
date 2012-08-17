@@ -36,7 +36,7 @@ class Bootstrap
 		return $this;
 	}
 
-	protected function _viewCodePage($id)
+	public function viewCodePage($id)
 	{
 		$sql = 'SELECT code FROM code WHERE unique_id = ?';
 		$code = $this->_app['db']->fetchAssoc($sql, array($id));
@@ -49,7 +49,7 @@ class Bootstrap
 		return $this->_app['twig']->render('view.twig', $viewParams);
 	}
 
-	protected function _indexPage()
+	public function indexPage()
 	{
 		$this->_app->register(new Silex\Provider\FormServiceProvider);
 		$form = $this->_app['form.factory']->createBuilder('form')
@@ -99,8 +99,9 @@ class Bootstrap
 
 	public function loadDispatcher()
 	{
-		$this->_app->get('/{id}', function ($id)  { return $this->_viewCodePage($id); } );
-		$this->_app->match('/', function () { return $this->_indexPage(); } );
+		$myself = $this;
+		$this->_app->get('/{id}', function ($id) use ($myself) { return $myself->viewCodePage($id); } );
+		$this->_app->match('/', function () use ($myself) { return $myself->indexPage(); } );
 		return $this;
 	}
 
