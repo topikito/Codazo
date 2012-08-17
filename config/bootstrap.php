@@ -1,77 +1,122 @@
 <?php
 
-require_once __DIR__ . '/../silex-core/vendor/autoload.php';
+require_once __DIR__ . '/../vendor/autoload.php';
+require_once __DIR__ . '/../lib/reversible_uid/reversible_unique_id.php';
 
-$app = new Silex\Application();
+class Bootstrap
+{
+	protected $_app;
+	protected $_config;
 
-/** CONFIG * */
-$app->register(new Silex\Provider\TwigServiceProvider(), array(
-	'twig.path' => __DIR__ . '/../views',
-));
-$app->register(new Silex\Provider\TranslationServiceProvider(), array(
-	'translator.messages' => array()
-));
-$app->register(new Silex\Provider\DoctrineServiceProvider(), array(
-	'db.options' => array(
-		'driver' => 'pdo_mysql',
-		'host' => 'localhost',
-		'dbname' => 'codazo_db',
-		'user' => 'root',
-		'password' => 'root',
-	),
-));
-$app['debug'] = true;
-
-
-/** DISPATCHER * */
-$app->get('/{id}', function ($id) use ($app)
+	private function __construct($config)
 	{
-	var_dump($id);die;
-		$sql  = "SELECT code FROM code WHERE unique_id = ?";
-		$code = $app['db']->fetchAssoc($sql, array((int) $id));
+		$this->_app = new Silex\Application();
+		$this->_config = $config;
+	}
+
+	public function loadConfig()
+	{
+		/** CONFIG * */
+		$this->_app->register(new Silex\Provider\TwigServiceProvider(), array(
+			'twig.path' => __DIR__ . '/../views',
+		));
+		$this->_app->register(new Silex\Provider\TranslationServiceProvider(), array(
+			'translator.messages' => array()
+		));
+		$this->_app->register(new Silex\Provider\DoctrineServiceProvider(), array(
+			'db.options' => array(
+				'driver' => 'pdo_mysql',
+				'host' => $this->_config['database.host'],
+				'dbname' => $this->_config['database.name'],
+				'user' => $this->_config['database.user'],
+				'password' => $this->_config['database.password'],
+			),
+		));
+		$this->_app['debug'] = $this->_config['debug.mode'];
+		return $this;
+	}
+
+	protected function _viewCodePage($id)
+	{
+		$sql = 'SELECT code FROM code WHERE unique_id = ?';
+		$code = $this->_app['db']->fetchAssoc($sql, array($id));
 
 		$viewParams = array(
-			'code'				=> $code,
-			'currentSection'	=> 'view'
+			'code' => $code,
+			'currentSection' => 'view'
 		);
 
-		return $app['twig']->render('view.twig', $viewParams);
-	});
+		return $this->_app['twig']->render('view.twig', $viewParams);
+	}
 
-$app->match('/', function () use ($app)
+	protected function _indexPage()
 	{
-		$app->register(new Silex\Provider\FormServiceProvider);
-		$form = $app['form.factory']->createBuilder('form')
+		$this->_app->register(new Silex\Provider\FormServiceProvider);
+		$form = $this->_app['form.factory']->createBuilder('form')
 			->add('code', 'textarea', array('label' => ' ', 'attr' => array('style' => 'height: 300px', 'class' => 'span12')))
 			->add('lang', 'text', array('label' => 'Language', 'required' => false, 'attr' => array('placeholder' => 'Auto')))
 			->add('convert_tabs', 'checkbox', array('label' => 'Convert tabs to spaces', 'required' => false))
 			->add('tab2spaces', 'text', array('label' => 'Tab to spaces', 'required' => false, 'attr' => array('value' => '4')))
 			->getForm();
 
-		$request = $app['request'];
+		$request = $this->_app['request'];
 		if ('POST' == $request->getMethod())
 		{
 			$form->bindRequest($request);
 			if ($form->isValid())
 			{
+				$this->_app['db']->beginTransaction();
+
 				$data = $form->getData();
 
-				var_dump($data);
+				$values = array(
+					'code' => $data['code'],
+					'created_at' => time(),
+					'ip' => $_SERVER['REMOTE_ADDR'],
+					'language' => $data['lang']
+				);
+				$insertResult = $this->_app['db']->insert('code', $values);
+				$insertedId = $this->_app['db']->lastInsertId();
 
+				$ruid = new ReversibleUniqueId();
+				$uniqueId = $ruid->encode($insertedId);
 
-				// do something with the data
-				// redirect somewhere
-				//return $app->redirect('...');
-				die('---');
+				$updateResult = $this->_app['db']->update('code', array('unique_id' => $uniqueId), array('id' => $insertedId));
+
+				$this->_app['db']->commit();
+
+				return $this->_app->redirect('/' . $uniqueId);
 			}
 		}
 
 		$viewParams = array(
-			'form'				=> $form->createView(),
-			'currentSection'	=> 'paste'
+			'form' => $form->createView(),
+			'currentSection' => 'paste'
 		);
 
-		return $app['twig']->render('paste.twig', $viewParams);
-	});
+		return $this->_app['twig']->render('paste.twig', $viewParams);
+	}
 
-return $app;
+	public function loadDispatcher()
+	{
+		$this->_app->get('/{id}', function ($id)  { return $this->_viewCodePage($id); } );
+		$this->_app->match('/', function () { return $this->_indexPage(); } );
+		return $this;
+	}
+
+	public function getApplication()
+	{
+		return $this->_app;
+	}
+
+	static public function load($config)
+	{
+		$me = new static($config);
+		$me->loadConfig()->loadDispatcher();
+		return $me->getApplication();
+	}
+
+}
+
+$config = parse_ini_file('config.ini', true);
+return Bootstrap::load($config[CDZ_ENV]);

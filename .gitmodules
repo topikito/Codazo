@@ -1,0 +1,3 @@
+[submodule "lib/reversible_uid"]
+	path = lib/reversible_uid
+	url = https://github.com/topikito/ReversibleUniqueId.git
