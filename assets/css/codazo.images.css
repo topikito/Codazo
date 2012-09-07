@@ -1,2 +1,2 @@
 #codazo-logo { background: no-repeat transparent url(../img/codazo/vertical-logo.png); width: 53px; height: 210px; display: block; position: fixed; visibility: hidden}
-#codazo-bottom { background: no-repeat transparent url(../img/codazo/codazo-name.png); width: 1030px; height: 259px; display: block; bottom: -20px; position: absolute; left: 50%; margin-left: -515px; opacity: 0.05}
+#codazo-bottom { background: no-repeat transparent url(../img/codazo/codazo-name.png); width: 1030px; height: 259px; display: block; bottom: -20px; position: absolute; left: 50%; margin-left: -515px; opacity: 0.05; z-index: -1}
