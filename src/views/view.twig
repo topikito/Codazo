@@ -6,7 +6,12 @@
 	<div class="">
 		<p>
 		<h1>Show me the code!</h1>
-		<pre class="prettyprint linenums" id="view-pretty-code">{{ code.code }}</pre>
+		<ul class="nav nav-pills">
+			<li class="">
+				<a target="_blank" href="/{{ id }}/raw">in raw</a>
+			</li>
+		</ul>
+		<pre class="prettyprint {% if language != null %}lang-{{ language }}{% endif %} linenums" id="view-pretty-code">{{ code.code }}</pre>
 		<hr>
 		</p>
 	</div>
