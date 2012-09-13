@@ -18,8 +18,9 @@ class CodeController extends CodazoController
 		$this->_app->register(new Silex\Provider\FormServiceProvider);
 		$form = $this->_app['form.factory']->createBuilder('form')
 			->add('code', 'textarea', array('label' => ' ', 'attr' => array('style' => 'height: 300px', 'class' => 'span12')))
-			->add('lang', 'text', array('label' => 'Language', 'required' => false, 'attr' => array('placeholder' => 'Auto')))
+			->add('langLabel', 'text', array('label' => 'Language', 'required' => false, 'attr' => array('placeholder' => 'Auto')))
 			->add('line', 'text', array('label' => 'First line', 'required' => false, 'attr' => array('placeholder' => '1')))
+			->add('lang', 'hidden', array('required' => false ))
 			->getForm();
 
 		$request = $this->_app['request'];

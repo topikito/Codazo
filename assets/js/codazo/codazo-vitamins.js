@@ -1,10 +1,48 @@
 (function($) {
 
-	var Application = (function(config)
+	var config = {
+		availableLanguages :
+		{
+		/*	extension	: [ labels ] */
+			'bas'		: [ 'BASIC' ]
+		,	'sh'		: [ 'Bash Script' ]
+		,	'java'		: [ 'Java' ]
+		,	'xml'		: [ 'HTML', 'XML', 'XHMTL', 'XSL' ]
+		,	'c'			: [ 'C', 'C++' ]
+		,	'cs'		: [ 'Visual C#' ]
+		,	'css'		: [ 'CSS' ]
+		,	'py'		: [ 'Python' ]
+		,	'perl'		: [ 'Perl' ]
+		,	'rb'		: [ 'Ruby' ]
+		,	'asp'		: [ 'ASP' ]
+		,	'coffee'	: [ 'Coffee script' ]
+		,	'js'		: [ 'ActionScript', 'Javascript', 'JSONP' ]
+		,	'json'		: [ 'JSON' ]
+		,	'php'		: [ 'PHP' ]
+		,	'clj'		: [ 'Clojure' ]
+		,	'go'		: [ 'Go' ]
+		,	'hs'		: [ 'Haskell' ]
+		,	'lua'		: [ 'Lua' ]
+		,	'ml'		: [ 'OCAML', 'SML', 'F#' ]
+		,	'nemerle'	: [ 'Nemerle' ]
+		,	'proto'		: [ 'Protocol Buffers' ]
+		,	'scala'		: [ 'Scala' ]
+		,	'sql'		: [ 'SQL', 'MySQL' ]
+		,	'tex'		: [ 'TeX', 'LaTeX' ]
+		,	'vhdl'		: [ 'VHDL' ]
+		,	'vb'		: [ 'Visual Basic' ]
+		,	'wiki.meta'	: [ 'WikiText' ]
+		,	'xq'		: [ 'XQuery' ]
+		,	'yml'		: [ 'YAML' ]
+		}
+	};
+
+	var Application = (function( config )
 	{
 		//Form elements
 		var _codeTextArea		= $('#form_code');
 		var _language			= $('#form_lang');
+		var _languageLabel		= $('#form_langLabel');
 		var _firstLine			= $('#form_line');
 
 		//Other DOM elements
@@ -33,7 +71,7 @@
 
 		var _prettyfy = function( code, target ) {
 			var	formatted = []
-			,	language = _language && _language.length && _language.val() || null
+			,	language = ( _language.length && _language.val() ) || null
 			,	line = Math.max( 1, parseInt( _firstLine && _firstLine.val() || 1, 10 ) )
 			,	$target = $(target)
 
@@ -43,8 +81,14 @@
 			if (!code) return false
 
 			$target.html( code )
+
+			// Remove any lang-??? or linenum:??? class
 			$target.prop( 'className', $target.prop('className').replace( /\blinenums(\:[0-9]*)?\b|\blang-[a-z]*\b/gi, '' ).replace(/\s+/g, ' ') )
+
+			// Add lang
 			if (language) $target.addClass( 'lang-'+language.toLowerCase() )
+
+			// Add linenum
 			if (line > 1) $target.addClass( 'linenums:'+line )
 			else $target.addClass('linenums')
 
@@ -52,6 +96,39 @@
 			prettyPrint();
 
 			return true
+		}
+
+		var _updateLanguage = function(event) {
+
+			var extension = ''
+			,	label = _languageLabel.val()
+			,	i
+			,	j
+
+			for (i in config.availableLanguages)
+			{
+				// IE support
+				if (!Array.prototype.indexOf) {
+					for (j=0; j<config.availableLanguages[i].length; j++)
+					{
+						if (config.availableLanguages[i][j] === extension) {
+							extension = i
+							break;
+						}
+						if (extension) break;
+					}
+				} else {
+					if ( config.availableLanguages[i].indexOf( label ) > -1 )
+					{
+						extension = i
+						break
+					}
+				}
+			}
+
+			_language.val( extension )
+
+			_refreshPreview()
 		}
 
 		var _captureTab = function(event) {
@@ -90,8 +167,17 @@
 		};
 
 		var init = function(config) {
-			_language.typeahead({
-				source: config.availableLanguages
+
+			var langList = []
+			,	i
+
+			for (i in config.availableLanguages)
+			{
+				langList = langList.concat( config.availableLanguages[i] )
+			}
+
+			_languageLabel.typeahead({
+				source: langList
 			});
 
 
@@ -106,8 +192,8 @@
 				'blur'		: _refreshPreview
 			})
 
-			_language.on({
-				'blur'		: _refreshPreview
+			_languageLabel.on({
+				'change'	: _updateLanguage
 			})
 
 			if (_viewPrettyContainer && _viewPrettyContainer.length)
@@ -130,16 +216,7 @@
 			init: init
 		};
 
-	})(config);
-
-	var config = {
-		availableLanguages :
-		[
-		'ActionScript','AppleScript','Asp','BASIC','C','C++','Clojure','COBOL',
-		'ColdFusion','Erlang','Fortran','Groovy','Haskell','Java','JavaScript',
-		'Lisp','Perl','PHP','Python','Ruby','Scala','Scheme'
-		]
-	};
+	})( config );
 
 	$(document).ready(function() {
 		Application.init(config);
