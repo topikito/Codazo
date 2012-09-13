@@ -53,6 +53,16 @@
 		var _alertUrl = $(".alert");
 		var _alertUrlLink = $('a#copy-link');
 
+
+		var _eventDelayer = function( method, delay ) {
+			var timer
+
+			return function( event ) {
+				if (timer) clearTimeout( timer )
+				timer = setTimeout( $.proxy( method, this ), delay )
+			}
+		}
+
 		var _htmlEntities = function(str) {
 			return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 		}
@@ -182,17 +192,19 @@
 
 
 			_codeTextArea.on({
-				'keyup'		: _refreshPreview,
+				'keyup'		: _eventDelayer( _refreshPreview, 100 ),
 				'change'	: _refreshPreview,
 				'blur'		: _refreshPreview,
 				'keydown'	: _captureTab
 			})
 
 			_firstLine.on({
+				'keyup'		:  _eventDelayer( _refreshPreview, 100 ),
 				'blur'		: _refreshPreview
 			})
 
 			_languageLabel.on({
+				'keyup'		:  _eventDelayer( _refreshPreview, 100 ),
 				'change'	: _updateLanguage
 			})
 
