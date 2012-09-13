@@ -3,6 +3,9 @@
 
 <div class="container">
 
+	<input type="hidden" id="form_lang" value="{{ language }}" />
+	<input type="hidden" id="form_line" value="{{ first_line }}" />
+
 	<div class="">
 		<p>
 		<h1>Show me the code!</h1>
@@ -18,7 +21,7 @@
 			<button type="button" class="close" data-dismiss="alert">×</button>
 			<strong>URL Copied!</strong>
 		</div>
-		<pre class="prettyprint {% if language != null %}lang-{{ language }}{% endif %} linenums" id="view-pretty-code">{{ code.code }}</pre>
+		<pre class="prettyprint linenums" id="view-pretty-code">{{ code }}</pre>
 		<hr>
 		</p>
 	</div>

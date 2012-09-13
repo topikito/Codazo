@@ -1,13 +1,16 @@
-var Application = (function(config)
+(function($) {
+
+	var Application = (function(config)
 	{
 		//Form elements
 		var _codeTextArea		= $('#form_code');
 		var _language			= $('#form_lang');
+		var _firstLine			= $('#form_line');
 
 		//Other DOM elements
 		var _prettyCode			= $('#pretty-code');
 		var _prettyContainer	= $('#preview-code');
-		var _viewPrettyContainer	= $('#view-preview-code');
+		var _viewPrettyContainer	= $('#view-pretty-code');
 
 		var _alertUrl = $(".alert");
 		var _alertUrlLink = $('a#copy-link');
@@ -17,12 +20,39 @@ var Application = (function(config)
 		}
 
 		var _refreshPreview = function() {
-			var code = _htmlEntities(_codeTextArea.val());
 
-			_prettyCode.html(code);
-			prettyPrint();
-			_prettyContainer.show();
+			if( _prettyfy( _codeTextArea.val(), _prettyCode ) )
+			{
+				_prettyContainer.show()
+			}
+			else
+			{
+				_prettyContainer.hide()
+			}
 		};
+
+		var _prettyfy = function( code, target ) {
+			var	formatted = []
+			,	language = _language && _language.length && _language.val() || null
+			,	line = Math.max( 1, parseInt( _firstLine && _firstLine.val() || 1, 10 ) )
+			,	$target = $(target)
+
+			$target.empty()
+
+			code = _htmlEntities( code ).replace(/\r\n?/g, "\n" )
+			if (!code) return false
+
+			$target.html( code )
+			$target.prop( 'className', $target.prop('className').replace( /\blinenums(\:[0-9]*)?\b|\blang-[a-z]*\b/gi, '' ).replace(/\s+/g, ' ') )
+			if (language) $target.addClass( 'lang-'+language.toLowerCase() )
+			if (line > 1) $target.addClass( 'linenums:'+line )
+			else $target.addClass('linenums')
+
+			// TODO: specify target to prettyPrint
+			prettyPrint();
+
+			return true
+		}
 
 		var _captureTab = function(event) {
 			var keyCode = event.keyCode || event.which,
@@ -42,8 +72,9 @@ var Application = (function(config)
 				{
 					// FF/chrome support
 					var startPos = this.selectionStart
-						endPos = this.selectionEnd;
-						scrollTop = this.scrollTop;
+					,	endPos = this.selectionEnd
+					,	scrollTop = this.scrollTop
+
 					this.value = this.value.substring(0, startPos) + charToInsert + this.value.substring(endPos, this.value.length);
 					this.focus();
 					this.selectionStart = startPos + charToInsert.length;
@@ -63,10 +94,25 @@ var Application = (function(config)
 				source: config.availableLanguages
 			});
 
-			_codeTextArea.keyup(_refreshPreview).keydown(_captureTab);
-			if (_viewPrettyContainer)
+
+			_codeTextArea.on({
+				'keyup'		: _refreshPreview,
+				'change'	: _refreshPreview,
+				'blur'		: _refreshPreview,
+				'keydown'	: _captureTab
+			})
+
+			_firstLine.on({
+				'blur'		: _refreshPreview
+			})
+
+			_language.on({
+				'blur'		: _refreshPreview
+			})
+
+			if (_viewPrettyContainer && _viewPrettyContainer.length)
 			{
-				prettyPrint();
+				_prettyfy( _viewPrettyContainer.html(), _viewPrettyContainer )
 			}
 
 			_alertUrl.alert();
@@ -86,15 +132,17 @@ var Application = (function(config)
 
 	})(config);
 
-var config = {
-	availableLanguages :
-	[
-	'ActionScript','AppleScript','Asp','BASIC','C','C++','Clojure','COBOL',
-	'ColdFusion','Erlang','Fortran','Groovy','Haskell','Java','JavaScript',
-	'Lisp','Perl','PHP','Python','Ruby','Scala','Scheme'
-	]
-};
+	var config = {
+		availableLanguages :
+		[
+		'ActionScript','AppleScript','Asp','BASIC','C','C++','Clojure','COBOL',
+		'ColdFusion','Erlang','Fortran','Groovy','Haskell','Java','JavaScript',
+		'Lisp','Perl','PHP','Python','Ruby','Scala','Scheme'
+		]
+	};
 
-$(document).ready(function() {
-	Application.init(config);
-});
+	$(document).ready(function() {
+		Application.init(config);
+	});
+
+})( window.jQuery )
