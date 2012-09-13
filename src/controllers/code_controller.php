@@ -18,7 +18,9 @@ class CodeController extends CodazoController
 		$this->_app->register(new Silex\Provider\FormServiceProvider);
 		$form = $this->_app['form.factory']->createBuilder('form')
 			->add('code', 'textarea', array('label' => ' ', 'attr' => array('style' => 'height: 300px', 'class' => 'span12')))
-			//->add('lang', 'text', array('label' => 'Language', 'required' => false, 'attr' => array('placeholder' => 'Auto')))
+			->add('langLabel', 'text', array('label' => 'Language', 'required' => false, 'attr' => array('placeholder' => 'Auto')))
+			->add('line', 'text', array('label' => 'First line', 'required' => false, 'attr' => array('placeholder' => '1')))
+			->add('lang', 'hidden', array('required' => false ))
 			->getForm();
 
 		$request = $this->_app['request'];
@@ -33,7 +35,11 @@ class CodeController extends CodazoController
 					'code' => $data['code'],
 					'created_at' => time(),
 					'ip' => $_SERVER['REMOTE_ADDR'],
-					'language' => $data['lang']
+					'options' => serialize( array(
+						'language' => $data['lang'],
+						'first_line' => $data['line']
+					) )
+
 				);
 
 				$codeModel = new CodeModel();
@@ -55,11 +61,13 @@ class CodeController extends CodazoController
 	{
 		$codeModel = new CodeModel();
 		$code = $codeModel->get(array('unique_id' => $id));
+		$options = unserialize( $code['options'] );
 
 		$viewParams = array(
-			'code' => $code,
+			'code' => $code['code'],
 			'currentSection' => 'view',
-			'language'	=> '',
+			'language'	=> $options['language'],
+			'first_line'	=> $options['first_line'],
 			'id' => $id
 		);
 
