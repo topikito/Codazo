@@ -9,6 +9,9 @@ var Application = (function(config)
 		var _prettyContainer	= $('#preview-code');
 		var _viewPrettyContainer	= $('#view-preview-code');
 
+		var _alertUrl = $(".alert");
+		var _alertUrlLink = $('a#copy-link');
+
 		var _htmlEntities = function(str) {
 			return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 		}
@@ -59,12 +62,22 @@ var Application = (function(config)
 			_language.typeahead({
 				source: config.availableLanguages
 			});
-			
+
 			_codeTextArea.keyup(_refreshPreview).keydown(_captureTab);
 			if (_viewPrettyContainer)
 			{
 				prettyPrint();
 			}
+
+			_alertUrl.alert();
+			_alertUrlLink.zclip({
+				path:'./assets/js/zClip/ZeroClipboard.swf',
+				copy:window.location.href,
+				afterCopy:function(){
+					_alert.fadeIn();
+					_alertLink.addClass("disabled").html('Yet Copied!');
+				}
+			});
 		};
 
 		return {
