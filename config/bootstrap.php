@@ -38,11 +38,55 @@ class Bootstrap
 		return $this;
 	}
 
-	public function loadDispatcher()
-	{
-		CodazoObject::setApplication($this->_app);
+    private function loadDispatcher()
+    {
+        CodazoObject::setApplication($this->_app);
+        CodazoObject::setConfig($this->_config);
 
-		$this->_app->match('/', function ()
+        //TODO: Improve this and use the Silex native way
+        list($firstName) = explode('.',$_SERVER['SERVER_NAME']);
+
+        switch ($firstName)
+        {
+            case 'api':
+                $this->loadApiDispatcher();
+                break;
+
+            default:
+                $this->loadDefaultDispatcher();
+        }
+        return $this;
+    }
+
+    public function loadApiDispatcher()
+    {
+        //TODO: Change '/' for '/paste' or '/save'. Maybe use "PUT" instead
+        $this->_app->post('/', function ()
+        {
+            $con = new CodeApiController(array('callingFrom' => 'api'));
+            return $con->saveCode();
+        });
+
+        $this->_app->get('/{id}', function ($id)
+        {
+            $con = new CodeApiController(array('callingFrom' => 'api'));
+            return $con->viewCode($id);
+        });
+
+        return $this;
+    }
+
+	public function loadDefaultDispatcher()
+	{
+        /** POSTERS **/
+        $this->_app->post('/', function ()
+        {
+            $con = new CodeController();
+            return $con->saveCode();
+        });
+
+        /** GETTERS */
+		$this->_app->get('/', function ()
 			{
 				$con = new CodeController();
 				return $con->index();
@@ -78,4 +122,5 @@ class Bootstrap
 }
 
 $config = parse_ini_file('config.ini', true);
-return Bootstrap::load($config[CDZ_ENV]);
+define('ENV', $config['codazo.env']);
+return Bootstrap::load($config[ENV]);
