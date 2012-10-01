@@ -43,7 +43,7 @@ class Bootstrap
         CodazoObject::setApplication($this->_app);
         CodazoObject::setConfig($this->_config);
 
-        list($firstName) = explode('.',$_SERVER['SERVER_NAME']);
+        list($firstName) = explode('.',$_SERVER['HTTP_HOST']);
 
         switch ($firstName)
         {
