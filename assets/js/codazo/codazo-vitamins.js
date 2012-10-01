@@ -50,7 +50,6 @@
 		var _prettyContainer	= $('#preview-code');
 		var _viewPrettyContainer	= $('#view-pretty-code');
 
-		var _alertUrl = $(".alert");
 		var _alertUrlLink = $('a#copy-link');
 
 
@@ -213,13 +212,11 @@
 				_prettyfy( _viewPrettyContainer.html(), _viewPrettyContainer )
 			}
 
-			_alertUrl.alert();
 			_alertUrlLink.zclip({
 				path:'./assets/js/zClip/ZeroClipboard.swf',
-				copy:window.location.href,
+				copy: window.location.href,
 				afterCopy:function(){
-					_alert.fadeIn();
-					_alertLink.addClass("disabled").html('Yet Copied!');
+					_alertUrlLink.addClass("disabled").html($(this).data('copied'));
 				}
 			});
 		};

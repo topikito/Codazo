@@ -11,16 +11,12 @@
 		<h1>Show me the code!</h1>
 		<ul class="nav nav-pills">
 			<li class="">
-				<a target="_blank" href="/{{ uid }}/raw">in raw</a>
+				<a target="_blank" href="/{{ uid }}/raw">Raw</a>
 			</li>
 			<li class="">
-				<a id="copy-link" class="btn btn-secondary btn-large btn-red" >Copy URL!</a>
+				<a id="copy-link" data-copied="Copied" href="#" >Copy to clipboard</a>
 			</li>
 		</ul>
-		<div style="display:none;" class="alert alert-info">
-			<button type="button" class="close" data-dismiss="alert">×</button>
-			<strong>URL Copied!</strong>
-		</div>
 		<pre class="prettyprint linenums" id="view-pretty-code">{{ code }}</pre>
 		<hr>
 		</p>

@@ -43,33 +43,34 @@ class Bootstrap
         CodazoObject::setApplication($this->_app);
         CodazoObject::setConfig($this->_config);
 
-        //TODO: Improve this and use the Silex native way
         list($firstName) = explode('.',$_SERVER['SERVER_NAME']);
 
         switch ($firstName)
         {
-            case 'api':
+            case $this->_config['codazo.api.subdomain']:
                 $this->loadApiDispatcher();
                 break;
 
             default:
                 $this->loadDefaultDispatcher();
         }
+
+        $this->_app->match('/{whatever}', function() { return CodazoController::defaultJSONError(); });
+
         return $this;
     }
 
     public function loadApiDispatcher()
     {
-        //TODO: Change '/' for '/paste' or '/save'. Maybe use "PUT" instead
-        $this->_app->post('/', function ()
+        $this->_app->post('/save.{typeOfView}', function ($typeOfView)
         {
-            $con = new CodeApiController(array('callingFrom' => 'api'));
+            $con = new CodeApiController(array('callingFrom' => 'api', 'typeOfView' => $typeOfView));
             return $con->saveCode();
         });
 
-        $this->_app->get('/{id}', function ($id)
+        $this->_app->get('/view/{id}.{typeOfView}', function ($id, $typeOfView)
         {
-            $con = new CodeApiController(array('callingFrom' => 'api'));
+            $con = new CodeApiController(array('callingFrom' => 'api', 'typeOfView' => $typeOfView));
             return $con->viewCode($id);
         });
 
@@ -85,7 +86,7 @@ class Bootstrap
             return $con->saveCode();
         });
 
-        /** GETTERS */
+        /** GETTERS **/
 		$this->_app->get('/', function ()
 			{
 				$con = new CodeController();

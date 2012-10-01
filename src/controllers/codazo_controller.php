@@ -1,20 +1,12 @@
 <?php
 
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-
-/**
- * Description of codazo
- *
- * @author robertopereznygaard
- */
 class CodazoController extends CodazoObject
 {
 
 	protected   $_app;
     protected   $_config;
+
+    protected   $_allowedViews = array('twig', 'json');
 
     protected   $_typeOfView = 'twig';
 
@@ -74,8 +66,23 @@ class CodazoController extends CodazoObject
 
     public function setTypeOfView($type)
     {
+        if (!in_array($type, $this->_allowedViews))
+        {
+            return false;
+        }
+
         $this->_typeOfView = $type;
         return true;
+    }
+
+    static public function defaultJSONError()
+    {
+        $errorCode = 400;
+        $result = array(
+            'error' => 'Not cool. What are you trying to do?',
+            'errorCode' => $errorCode
+        );
+        return self::$_application->json($result, $errorCode);
     }
 
 }

@@ -1,10 +1,5 @@
 <?php
 
-/**
- * Description of code
- *
- * @author robertopereznygaard
- */
 class CodeController extends CodazoController
 {
     protected   $_callingFrom = 'www';
@@ -16,11 +11,11 @@ class CodeController extends CodazoController
         if (isset($params['callingFrom']))
         {
             $this->_callingFrom = $params['callingFrom'];
-            switch ($this->_callingFrom)
-            {
-                case 'api':
-                    $this->_typeOfView = 'json';
-            }
+        }
+
+        if (isset($params['typeOfView']))
+        {
+            $this->_typeOfView = $params['typeOfView'];
         }
 	}
 

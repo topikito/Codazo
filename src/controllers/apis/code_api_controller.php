@@ -5,6 +5,12 @@ class CodeApiController extends CodeController
 
     public function saveCode()
     {
+        if (!in_array($this->_typeOfView, $this->_allowedViews))
+        {
+            $this->_typeOfView = 'json';
+            return $this->_renderError(array('error' => 'Type of view not supported'), 418);
+        }
+
         $request = $this->_app['request'];
         $codeValue = $request->get('code');
         if (!$this->_checkVitalParams($codeValue))
