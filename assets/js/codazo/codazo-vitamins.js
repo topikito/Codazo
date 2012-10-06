@@ -63,7 +63,7 @@
 		}
 
 		var _htmlEntities = function(str) {
-			return String(str).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+			return $("<div></div>").text( str ).html()
 		}
 
 		var _refreshPreview = function() {
@@ -78,7 +78,7 @@
 			}
 		};
 
-		var _prettyfy = function( code, target ) {
+		var _prettyfy = function( code, target, preformatted ) {
 			var	formatted = []
 			,	language = ( _language.length && _language.val() ) || null
 			,	line = Math.max( 1, parseInt( _firstLine && _firstLine.val() || 1, 10 ) )
@@ -86,7 +86,7 @@
 
 			$target.empty()
 
-			code = _htmlEntities( code ).replace(/\r\n?/g, "\n" )
+			if (!preformatted) code = _htmlEntities( code ).replace(/\r\n?/g, "\n" )
 			if (!code) return false
 
 			$target.html( code )
@@ -209,7 +209,7 @@
 
 			if (_viewPrettyContainer && _viewPrettyContainer.length)
 			{
-				_prettyfy( _viewPrettyContainer.html(), _viewPrettyContainer )
+				_prettyfy( _viewPrettyContainer.html(), _viewPrettyContainer, true )
 			}
 
 			_alertUrlLink.zclip({
